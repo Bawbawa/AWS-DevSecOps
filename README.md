@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # LogiX
 
 A cloud-native logistics and warehouse operations platform that helps businesses track their products from the moment they arrive at a warehouse until they are shipped to a customer.
@@ -65,3 +66,7 @@ When running locally via Docker Compose, the services are mapped to the followin
 - **Order Service**: `http://localhost:8082`
 - **Inventory Service**: `http://localhost:8083`
 - **Warehouse Service**: `http://localhost:8084`
+=======
+# AWS-DevSecOps
+A secure cloud application demonstrating DevSecOps, serverless and container security, identity and access management, automated security testing, compliance, resilience, and secure CI/CD on AWS.
+>>>>>>> 893b4ae11447db34833a8c5f10431b79e7947734
