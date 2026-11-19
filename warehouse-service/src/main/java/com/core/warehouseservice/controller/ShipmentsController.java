@@ -40,8 +40,8 @@ public class ShipmentsController {
     @PreAuthorize("hasRole('WORKER')")
     public ResponseEntity<Void> markShipmentAsShipped(@PathVariable UUID shipmentId, JwtAuthenticationToken auth) {
         UUID orgId = UUID.fromString(auth.getTokenAttributes().get("org").toString());
-        orderService.markShipmentAsShipped(shipmentId, orgId);
+        UUID userId = UUID.fromString(auth.getToken().getSubject());
+        orderService.markShipmentAsShipped(shipmentId, orgId, userId);
         return ResponseEntity.ok().build();
     }
-
 }

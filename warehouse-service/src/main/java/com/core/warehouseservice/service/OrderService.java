@@ -1,5 +1,6 @@
 package com.core.warehouseservice.service;
 
+import com.core.orderservice.dto.OrderDTO;
 import com.core.warehouseservice.domain.Order;
 import com.core.warehouseservice.domain.OrderStatus;
 import com.core.warehouseservice.domain.OrderWarehouseStatus;
@@ -8,7 +9,7 @@ import com.core.warehouseservice.exceptions.OrderLockedException;
 import com.core.warehouseservice.exceptions.OrderNotFoundException;
 import com.core.warehouseservice.mapper.OrderMapper;
 import com.core.warehouseservice.repository.OrderRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -84,14 +85,25 @@ public class OrderService {
     }
 
     @Transactional
-    public void markShipmentAsShipped(UUID orderId, UUID orgId){
-        Order order = orderRepository.findOrderByIdAndOrganizationId(orderId, orgId)
-                .orElseThrow(() -> new OrderNotFoundException("No order found with id: " + orderId));
+    public void markShipmentAsShipped(UUID shipmentId, UUID orgId, UUID callerUserId){
+        // Verify that the caller is allowed to ship this order
+        Order order = orderRepository.findOrderByIdAndOrganizationId(shipmentId, orgId)
+                .orElseThrow(() -> new OrderNotFoundException(
+                "Shipment not found: " + shipmentId
+                ));
+
+        // If the order is currently locked by another worker, deny the operation
+        if (order.getLockedByUserId() != null && !order.getLockedByUserId().equals(callerUserId)
+                && order.getOrderStatus() == OrderWarehouseStatus.IN_PROGRESS && order.getLockExpiryTime() != null
+                && order.getLockExpiryTime().isAfter(java.time.Instant.now())) {
+            throw new org.springframework.security.access.AccessDeniedException("You are not the owner of this shipment.");
+        }
 
         order.setOrderStatus(OrderWarehouseStatus.SHIPPED);
         orderRepository.save(order);
         snsPublisherService.publishOrderStatusEvent(new OrderStatusUpdateDTO(order.getId(), OrderStatus.SHIPPED));
     }
+
 
     @Transactional
     public void markOrderAsPacked(UUID orderId, UUID orgId){
