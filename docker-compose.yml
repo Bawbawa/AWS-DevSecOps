@@ -1,23 +1,30 @@
 services:
   # AUTH SERVICE POSTGRES DATABASE
   auth-db:
-    image: postgres:latest
+    image: postgres:16
     container_name: auth-db
     environment:
       POSTGRES_DB: ${AUTH_DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${AUTH_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     ports:
       - "5432:5432"
     volumes:
-      - auth_data:/var/lib/postgresql
+      - auth_data:/var/lib/postgresql/data
 
   # AUTH SERVICE
   auth-service:
     build: ./auth-service
     container_name: auth-service
     depends_on:
-      - auth-db
+      auth-db:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/${AUTH_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
@@ -29,16 +36,22 @@ services:
       - "8081:8080"
   # ORDER SERVICE POSTGRES DATABASE
   order-db:
-    image: postgres:latest
+    image: postgres:16
     container_name: order-db
     environment:
       POSTGRES_DB: ${ORDER_DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${ORDER_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     ports:
       - "5433:5432"
     volumes:
-      - order_data:/var/lib/postgresql
+      - order_data:/var/lib/postgresql/data
 
   # ORDER SERVICE
   order-service:
@@ -66,16 +79,22 @@ services:
 
   # INVENTORY SERVICE POSTGRES DATABASE
   inventory-db:
-    image: postgres:latest
+    image: postgres:16
     container_name: inventory-db
     environment:
       POSTGRES_DB: ${INVENTORY_DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${INVENTORY_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     ports:
       - "5434:5432"
     volumes:
-      - inventory_data:/var/lib/postgresql
+      - inventory_data:/var/lib/postgresql/data
 
   # INVENTORY SERVICE
   inventory-service:
@@ -104,16 +123,22 @@ services:
 
   # WAREHOUSE SERVICE POSTGRES DATABASE
   warehouse-db:
-    image: postgres:latest
+    image: postgres:16
     container_name: warehouse-db
     environment:
       POSTGRES_DB: ${WAREHOUSE_DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${WAREHOUSE_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     ports:
       - "5435:5432"
     volumes:
-      - warehouse_data:/var/lib/postgresql
+      - warehouse_data:/var/lib/postgresql/data
 
   # WAREHOUSE SERVICE
   warehouse-service:

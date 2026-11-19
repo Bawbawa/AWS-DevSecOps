@@ -1,5 +1,6 @@
 package com.core.warehouseservice.service;
 
+import com.core.orderservice.dto.OrderDTO;
 import com.core.warehouseservice.domain.Order;
 import com.core.warehouseservice.domain.OrderStatus;
 import com.core.warehouseservice.domain.OrderWarehouseStatus;
@@ -87,7 +88,9 @@ public class OrderService {
     public void markShipmentAsShipped(UUID shipmentId, UUID orgId, UUID callerUserId){
         // Verify that the caller is allowed to ship this order
         Order order = orderRepository.findOrderByIdAndOrganizationId(shipmentId, orgId)
-                .orElseThrow(() -> new OrderNotFoundException(shipmentId));
+                .orElseThrow(() -> new OrderNotFoundException(
+                "Shipment not found: " + shipmentId
+                ));
 
         // If the order is currently locked by another worker, deny the operation
         if (order.getLockedByUserId() != null && !order.getLockedByUserId().equals(callerUserId)
