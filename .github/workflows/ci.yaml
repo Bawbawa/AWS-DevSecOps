@@ -82,6 +82,7 @@ jobs:
           SPRING_DATASOURCE_USERNAME: testuser
           SPRING_DATASOURCE_PASSWORD: testpass
           JWT_SECRET: ci-test-secret-key-that-is-long-enough-for-hmac-sha256
+          PASSWORD_ENCODING_PEPPER: ci-test-pepper-for-testing-only
         run: |
           chmod +x ./mvnw
           ./mvnw --batch-mode --no-transfer-progress clean verify
